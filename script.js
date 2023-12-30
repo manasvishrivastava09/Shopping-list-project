@@ -3,6 +3,8 @@ const itemInput = document.getElementById('item-input');
 const itemList = document.getElementById('item-list');
 const itemClear = document.getElementById('clear');
 const itemFilter = document.getElementById('filter');
+let isEditMode = false;
+const formBtn = itemForm.querySelector('button');
 
 function displayItems(){
   const itemsFromStorage = getItemFromStorage();
@@ -12,12 +14,25 @@ function displayItems(){
 function addItemSubmit(e) {
   e.preventDefault();
 
-  const newItem = itemInput.value;
+  let newItem = itemInput.value;
 
   // Validate Input
   if (newItem === '') {
     alert('Please add an item');
     return;
+  }
+  //Check for edit mode
+  if(isEditMode){
+    const itemToEdit = itemList.querySelector('.edit-mode');
+    removeItemFromStorage(itemToEdit.textContent);
+    itemToEdit.classList.remove('edit-mode');
+    itemToEdit.remove();
+    isEditMode = false;
+  }else{
+    if(checkIfItemExists(newItem)){
+      alert('That item already exist');
+      return;
+    }
   }
 //add item to dom element
   addItemToDOM(newItem);
@@ -42,7 +57,7 @@ function createIcon(classes) {
   return icon;
 }
 function addItemToStorage(item){
-  const itemsFromStorage = getItemFromStorage();
+  let itemsFromStorage = getItemFromStorage();
 
   if(localStorage.getItem('items')===null){
     itemsFromStorage = [];
@@ -68,7 +83,28 @@ function getItemFromStorage(){
 function onClickItem(e){
   if(e.target.parentElement.classList.contains('remove-item')){
     removeItem(e.target.parentElement.parentElement);
+  }else{
+    setItemToEdit(e.target);
   }
+}
+
+function checkIfItemExists(item){
+  const itemsFromStorage = getItemFromStorage();
+  
+  return itemsFromStorage.includes(item);
+
+}
+function setItemToEdit(item){
+  isEditMode = true;
+
+  itemList.querySelectorAll('li')
+  .forEach((i) => i.classList.remove('edit-mode'));
+
+  item.classList.add('edit-mode');
+  formBtn.innerHTML = 
+  '<i class="fa-solid fa-pen"></i>  Update Item';
+  formBtn.style.backgroundColor = '#228B22';
+  itemInput.value = item.textContent;
 }
 
 function removeItem(item){
@@ -133,6 +169,7 @@ function addItemToDOM(item){
 
 
 function checkUI(){
+  itemInput.value='';
   const items = itemList.querySelectorAll('li');
 
   if(items.length === 0){
@@ -142,6 +179,8 @@ function checkUI(){
     itemClear.style.display='block';
     itemFilter.style.display = 'block';
   }
+  formBtn.innerHTML ='<i class="fa-solid fa-plus"></i> Add Item';
+  formBtn.style.backgroundColor='#333';
 }
 
 //Initialise app
