@@ -1,6 +1,8 @@
 const itemForm = document.getElementById('item-form');
 const itemInput = document.getElementById('item-input');
 const itemList = document.getElementById('item-list');
+const itemClear = document.getElementById('clear');
+const itemFilter = document.getElementById('filter');
 
 function addItem(e) {
   e.preventDefault();
@@ -21,7 +23,7 @@ function addItem(e) {
   li.appendChild(button);
 
   itemList.appendChild(li);
-
+  checkUI();
   itemInput.value = '';
 }
 
@@ -39,5 +41,56 @@ function createIcon(classes) {
   return icon;
 }
 
+function removeItem(e){
+  if(e.target.parentElement.classList.contains('remove-item')){
+    if(confirm('Are you sure?')){
+    e.target.parentElement.parentElement.remove();
+    }
+    checkUI();
+  };
+  
+}
+function onClear(){
+  // console.log(itemList.firstChild);
+  while(itemList.firstChild){
+    itemList.removeChild(itemList.firstChild);
+  }
+  checkUI();
+}
+
+function filterItems(e){
+  const items = itemList.querySelectorAll('li');
+  const text = e.target.value.toLowerCase();
+  items.forEach(item =>{
+    const itemName = item.firstChild.textContent.toLowerCase();
+
+    console.log(itemName);
+    if(itemName.indexOf(text)!==-1){
+      item.style.display='flex';
+    }else{
+      item.style.display='none';
+
+    }
+  });
+
+  console.log(text);
+
+}
+
+function checkUI(){
+  const items = itemList.querySelectorAll('li');
+
+  if(items.length === 0){
+    itemClear.style.display='none';
+    itemFilter.style.display = 'none';
+  }else{
+    itemClear.style.display='block';
+    itemFilter.style.display = 'block';
+  }
+}
 // Event Listeners
 itemForm.addEventListener('submit', addItem);
+itemList.addEventListener('click',removeItem);
+itemClear.addEventListener('click',onClear);
+itemFilter.addEventListener('input',filterItems);
+checkUI();
